@@ -50,10 +50,6 @@ class WorldSession;
 #define AHB_ORANGE_I    12
 #define AHB_YELLOW_I    13
 
-#define TC_LOG_INFO(a, ...)     sLog->outString(__VA_ARGS__)
-#define TC_LOG_ERROR(a, ...)    sLog->outError(__VA_ARGS__)
-#define TC_LOG_DEBUG(a, ...)    sLog->outDebug(LOG_FILTER_MODULES,__VA_ARGS__)
-
 class AHBConfig
 {
 private:
