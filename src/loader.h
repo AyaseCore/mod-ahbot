@@ -1,2 +1,0 @@
-void AddMyWorldScripts();
-void AddMyPlayerScripts();
