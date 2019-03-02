@@ -1,62 +1,3 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 32edeb3458..35385f2271 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -46,6 +46,27 @@ if(EXISTS "conf/config.cmake")
-   include(conf/config.cmake)
- endif()
- 
-+#
-+# Loading dyn modules
-+#
-+
-+# add modules and dependencies
-+CU_SUBDIRLIST(sub_DIRS  "${CMAKE_SOURCE_DIR}/modules" FALSE FALSE)
-+FOREACH(subdir ${sub_DIRS})
-+
-+    get_filename_component(MODULENAME ${subdir} NAME)
-+
-+    if (";${DISABLED_AC_MODULES};" MATCHES ";${MODULENAME};")
-+       continue()
-+    endif()
-+
-+    STRING(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" subdir_rel ${subdir})
-+    if(EXISTS "${subdir}/CMakeLists.txt")
-+        message("Loading module: ${subdir_rel}")
-+        add_subdirectory("${subdir_rel}")
-+    endif()
-+ENDFOREACH()
-+
- CU_RUN_HOOK("AFTER_LOAD_CONF")
- 
- # build in Release-mode by default if not explicitly set
-@@ -107,26 +128,6 @@ if( TOOLS )
-   add_subdirectory(src/tools)
- endif()
- 
--#
--# Loading dyn modules
--#
--
--# add modules and dependencies
--CU_SUBDIRLIST(sub_DIRS  "${CMAKE_SOURCE_DIR}/modules" FALSE FALSE)
--FOREACH(subdir ${sub_DIRS})
--
--    get_filename_component(MODULENAME ${subdir} NAME)
--
--    if (";${DISABLED_AC_MODULES};" MATCHES ";${MODULENAME};")
--       continue()
--    endif()
--
--    STRING(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" subdir_rel ${subdir})
--    if(EXISTS "${subdir}/CMakeLists.txt")
--        message("Loading module: ${subdir_rel}")
--        add_subdirectory("${subdir_rel}")
--    endif()
--ENDFOREACH()
- 
- #
- # Loading application sources
 diff --git a/src/server/game/AuctionHouse/AuctionHouseMgr.cpp b/src/server/game/AuctionHouse/AuctionHouseMgr.cpp
 index 4aba5703b2..5c9a332016 100644
 --- a/src/server/game/AuctionHouse/AuctionHouseMgr.cpp
@@ -126,7 +67,7 @@ index 4aba5703b2..5c9a332016 100644
  
      sScriptMgr->OnAuctionRemove(this, auction);
 diff --git a/src/server/game/Mails/Mail.cpp b/src/server/game/Mails/Mail.cpp
-index ef72cbfe2c..2f57ac9687 100644
+index 6683fe2f15..9fcd209454 100644
 --- a/src/server/game/Mails/Mail.cpp
 +++ b/src/server/game/Mails/Mail.cpp
 @@ -15,6 +15,9 @@
@@ -139,7 +80,7 @@ index ef72cbfe2c..2f57ac9687 100644
  
  MailSender::MailSender(Object* sender, MailStationery stationery) : m_stationery(stationery)
  {
-@@ -168,6 +171,15 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver,
+@@ -175,6 +178,15 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver,
  
      uint32 mailId = sObjectMgr->GenerateMailID();
  
@@ -156,33 +97,25 @@ index ef72cbfe2c..2f57ac9687 100644
  
      //expire time if COD 3 days, if no COD 30 days, if auction sale pending 1 hour
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 01b1fe0acb..38b0e5fc90 100644
+index d1a82ee70f..7ea4386788 100644
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
-@@ -76,6 +76,9 @@
- #include "AsyncAuctionListing.h"
- #include "SavingSystem.h"
- #include <VMapManager2.h>
+@@ -82,6 +82,10 @@
+ #include "LuaEngine.h"
+ #endif
+ 
 +#ifdef MOD_AH_BOT
 +#include "AuctionHouseBot.h"
 +#endif
- 
++
  ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
  uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
-@@ -1635,6 +1638,20 @@ void World::SetInitialWorldSettings()
+ uint32 World::m_worldLoopCounter = 0;
+@@ -1709,6 +1713,11 @@ void World::SetInitialWorldSettings()
      sLog->outString("Loading Completed Achievements...");
      sAchievementMgr->LoadCompletedAchievements();
  
 +#ifdef MOD_AH_BOT
-+    std::string conf_path = _CONF_DIR;
-+    std::string cfg_file = conf_path + "/mod_ahbot.conf";
-+#ifdef WIN32
-+    cfg_file = "mod_ahbot.conf";
-+#endif
-+    std::string cfg_def_file = cfg_file + ".dist";
-+    sConfigMgr->LoadMore(cfg_def_file.c_str());
-+    sConfigMgr->LoadMore(cfg_file.c_str());
-+
 +    // Initialize AHBot settings before deleting expired auctions due to AHBot hooks
 +    auctionbot->InitializeConfiguration();
 +#endif
@@ -190,10 +123,10 @@ index 01b1fe0acb..38b0e5fc90 100644
      ///- Load dynamic data tables from the database
      sLog->outString("Loading Item Auctions...");
      sAuctionMgr->LoadAuctionItems();
-@@ -1871,6 +1888,11 @@ void World::SetInitialWorldSettings()
-     mgr = ChannelMgr::forTeam(TEAM_HORDE);
-     mgr->LoadChannels();
- 
+@@ -1949,6 +1958,11 @@ void World::SetInitialWorldSettings()
+     sEluna->OnConfigLoad(false,false); // Must be done after Eluna is initialized and scripts have run.
+ #endif
+     
 +#ifdef MOD_AH_BOT
 +    sLog->outString("Initialize AuctionHouseBot...");
 +    auctionbot->Initialize();
@@ -202,7 +135,7 @@ index 01b1fe0acb..38b0e5fc90 100644
      uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
      sLog->outString();
      sLog->outError("WORLD: World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
-@@ -2031,6 +2053,9 @@ void World::Update(uint32 diff)
+@@ -2114,6 +2128,9 @@ void World::Update(uint32 diff)
          // pussywizard: handle auctions when the timer has passed
          if (m_timers[WUPDATE_AUCTIONS].Passed())
          {
