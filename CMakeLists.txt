@@ -5,4 +5,3 @@ CU_ADD_HOOK(BEFORE_SCRIPTS_LIBRARY "${CMAKE_CURRENT_LIST_DIR}/cmake/before_scrip
 CU_ADD_HOOK(AFTER_GAME_LIBRARY "${CMAKE_CURRENT_LIST_DIR}/cmake/after_game_lib.cmake")
 AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/cs_ah_bot.cpp")
 AC_ADD_SCRIPT_LOADER("AHBotCommand" "${CMAKE_CURRENT_LIST_DIR}/src/loader_cs_ah_bot.h")
-CU_ADD_HOOK(AFTER_WORLDSERVER_CMAKE "${CMAKE_CURRENT_LIST_DIR}/cmake/after_ws_install.cmake")
