@@ -26,7 +26,8 @@ struct AuctionEntry;
 class Player;
 class WorldSession;
 
-#include "ItemPrototype.h"
+#include "ItemTemplate.h"
+
 #define AHB_GREY        0
 #define AHB_WHITE       1
 #define AHB_GREEN       2
