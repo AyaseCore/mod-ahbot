@@ -98,7 +98,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(0, ahMapID, NULL, NULL);
+            auctionbot->Commands(0, ahMapID, 0, NULL);
         }
         else if (strncmp(opt, "minitems", l) == 0)
         {
@@ -109,7 +109,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(1, ahMapID, NULL, param1);
+            auctionbot->Commands(1, ahMapID, 0, param1);
         }
         else if (strncmp(opt, "maxitems", l) == 0)
         {
@@ -120,7 +120,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(2, ahMapID, NULL, param1);
+            auctionbot->Commands(2, ahMapID, 0, param1);
         }
         else if (strncmp(opt, "mintime", l) == 0)
         {
@@ -134,7 +134,7 @@ public:
                 return false;
             }
 
-            auctionbot.Commands(3, ahMapID, NULL, param1);
+            auctionbot.Commands(3, ahMapID, 0, param1);
             */
         }
         else if (strncmp(opt, "maxtime", l) == 0)
@@ -149,7 +149,7 @@ public:
                 return false;
             }
 
-            auctionbot.Commands(4, ahMapID, NULL, param1);
+            auctionbot.Commands(4, ahMapID, 0, param1);
             */
         }
         else if (strncmp(opt, "percentages", l) == 0)
@@ -234,7 +234,7 @@ public:
             strcat(param, param13);
             strcat(param, " ");
             strcat(param, param14);
-            auctionbot->Commands(5, ahMapID, NULL, param);
+            auctionbot->Commands(5, ahMapID, 0, param);
         }
         else if (strncmp(opt, "minprice", l) == 0)
         {
@@ -451,7 +451,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(12, ahMapID, NULL, param1);
+            auctionbot->Commands(12, ahMapID, 0, param1);
         }
         else if (strncmp(opt, "bidsperinterval", l) == 0)
         {
@@ -463,7 +463,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(13, ahMapID, NULL, param1);
+            auctionbot->Commands(13, ahMapID, 0, param1);
         }
         else
         {

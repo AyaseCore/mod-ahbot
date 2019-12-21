@@ -375,15 +375,10 @@ void AuctionHouseBot::addNewAuctions(Player *AHBplayer, AHBConfig *config)
             uint64 bidPrice = 0;
             uint32 stackCount = 1;
 
-            switch (SellMethod)
-            {
-            case 0:
-                buyoutPrice  = prototype->SellPrice;
-                break;
-            case 1:
-                buyoutPrice  = prototype->BuyPrice;
-                break;
-            }
+            if (SellMethod)
+                buyoutPrice = prototype->BuyPrice;
+            else
+                buyoutPrice = prototype->SellPrice;
 
             if (prototype->Quality <= AHB_MAX_QUALITY)
             {
@@ -571,39 +566,34 @@ void AuctionHouseBot::addNewAuctionBuyerBotBid(Player *AHBplayer, AHBConfig *con
         long double bidMax = 0;
 
         // check that bid has acceptable value and take bid based on vendorprice, stacksize and quality
-        switch (BuyMethod)
+        if (BuyMethod)
         {
-        case 0:
+            if (prototype->Quality <= AHB_MAX_QUALITY)
             {
-                if (prototype->Quality <= AHB_MAX_QUALITY)
-                {
-                    if (currentprice < prototype->SellPrice * pItem->GetCount() * config->GetBuyerPrice(prototype->Quality))
-                        bidMax = prototype->SellPrice * pItem->GetCount() * config->GetBuyerPrice(prototype->Quality);
-                }
-                else
-                {
-                    // quality is something it shouldn't be, let's get out of here
-                    if (debug_Out) sLog->outError( "AHBuyer: Quality %u not Supported", prototype->Quality);
-                    continue;
-                }
-                break;
+                if (currentprice < prototype->SellPrice * pItem->GetCount() * config->GetBuyerPrice(prototype->Quality))
+                    bidMax = prototype->SellPrice * pItem->GetCount() * config->GetBuyerPrice(prototype->Quality);
             }
-        case 1:
+            else
             {
-                if (prototype->Quality <= AHB_MAX_QUALITY)
-                {
-                    if (currentprice < prototype->BuyPrice * pItem->GetCount() * config->GetBuyerPrice(prototype->Quality))
-                        bidMax = prototype->BuyPrice * pItem->GetCount() * config->GetBuyerPrice(prototype->Quality);
-                }
-                else
-                {
-                    // quality is something it shouldn't be, let's get out of here
-                    if (debug_Out) sLog->outError( "AHBuyer: Quality %u not Supported", prototype->Quality);
+                // quality is something it shouldn't be, let's get out of here
+                if (debug_Out) sLog->outError( "AHBuyer: Quality %u not Supported", prototype->Quality);
                     continue;
-                }
-                break;
             }
         }
+        else
+        {
+            if (prototype->Quality <= AHB_MAX_QUALITY)
+            {
+                if (currentprice < prototype->BuyPrice * pItem->GetCount() * config->GetBuyerPrice(prototype->Quality))
+                    bidMax = prototype->BuyPrice * pItem->GetCount() * config->GetBuyerPrice(prototype->Quality);
+            }
+            else
+            {
+                // quality is something it shouldn't be, let's get out of here
+                if (debug_Out) sLog->outError( "AHBuyer: Quality %u not Supported", prototype->Quality);
+                    continue;
+            }
+        }        
 
         // check some special items, and do recalculating to their prices
         switch (prototype->Class)
@@ -866,16 +856,15 @@ void AuctionHouseBot::Initialize()
                 break;
             }
 
-            switch (SellMethod)
+            if (SellMethod)
             {
-            case 0:
-                if (itr->second.SellPrice == 0)
-                    continue;
-                break;
-            case 1:
                 if (itr->second.BuyPrice == 0)
                     continue;
-                break;
+            }
+            else
+            {
+                if (itr->second.SellPrice == 0)
+                    continue;
             }
 
             if (itr->second.Quality > 6)

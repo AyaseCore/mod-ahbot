@@ -183,6 +183,10 @@ AuctionHouseBot.DisableDruidItems = 0
 ###############################################################################
 # AUCTION HOUSE BOT FILTERS PART 3
 #
+#   AuctionHouseBot.DisabledItems
+#       Prevent Seller from listing specific item(s)
+#   Default "" (none)
+#
 #    AuctionHouseBot.DisableItemsBelowLevel
 #        Prevent Seller from listing Items below this Level
 #    Default 0 (Off)
@@ -249,6 +253,7 @@ AuctionHouseBot.DisableDruidItems = 0
 #
 ###############################################################################
 
+AuctionHouseBot.DisabledItems = ""
 AuctionHouseBot.DisableItemsBelowLevel = 0
 AuctionHouseBot.DisableItemsAboveLevel = 0
 AuctionHouseBot.DisableTGsBelowLevel = 0
