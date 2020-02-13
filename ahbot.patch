@@ -1,14 +1,3 @@
-From 147a844c7a6fe88c3f1a07aed48fdba499a20754 Mon Sep 17 00:00:00 2001
-From: BarbzYHOOL <professor_barbz@gmx.com>
-Date: Thu, 30 Jan 2020 23:49:28 +0100
-Subject: [PATCH] fix: ah_bot.patch
-
----
- .../game/AuctionHouse/AuctionHouseMgr.cpp     | 23 ++++++++++++++++++-
- src/server/game/Mails/Mail.cpp                | 12 ++++++++++
- src/server/game/World/World.cpp               | 12 ++++++++++
- 3 files changed, 46 insertions(+), 1 deletion(-)
-
 diff --git a/src/server/game/AuctionHouse/AuctionHouseMgr.cpp b/src/server/game/AuctionHouse/AuctionHouseMgr.cpp
 index b8363279..05318818 100644
 --- a/src/server/game/AuctionHouse/AuctionHouseMgr.cpp
@@ -108,7 +97,7 @@ index 6683fe2f..9fcd2094 100644
  
      //expire time if COD 3 days, if no COD 30 days, if auction sale pending 1 hour
 diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
-index 53ce3fc1..3b39a994 100644
+index 7b0f464f..997e52ad 100644
 --- a/src/server/game/World/World.cpp
 +++ b/src/server/game/World/World.cpp
 @@ -83,6 +83,10 @@
@@ -122,7 +111,7 @@ index 53ce3fc1..3b39a994 100644
  ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
  uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
  uint32 World::m_worldLoopCounter = 0;
-@@ -1739,6 +1743,11 @@ void World::SetInitialWorldSettings()
+@@ -1742,6 +1746,11 @@ void World::SetInitialWorldSettings()
      sLog->outString("Loading Completed Achievements...");
      sAchievementMgr->LoadCompletedAchievements();
  
@@ -134,7 +123,19 @@ index 53ce3fc1..3b39a994 100644
      ///- Load dynamic data tables from the database
      sLog->outString("Loading Item Auctions...");
      sAuctionMgr->LoadAuctionItems();
-@@ -2165,6 +2174,9 @@ void World::Update(uint32 diff)
+@@ -2003,6 +2012,11 @@ void World::SetInitialWorldSettings()
+         }
+     }
+ 
++    #ifdef MOD_AH_BOT
++        sLog->outString("Initialize AuctionHouseBot...");
++        auctionbot->Initialize();
++    #endif
++
+     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
+     sLog->outString();
+     sLog->outError("WORLD: World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000)); // outError for red color in console
+@@ -2168,6 +2182,9 @@ void World::Update(uint32 diff)
          // pussywizard: handle auctions when the timer has passed
          if (m_timers[WUPDATE_AUCTIONS].Passed())
          {
@@ -144,6 +145,3 @@ index 53ce3fc1..3b39a994 100644
              m_timers[WUPDATE_AUCTIONS].Reset();
  
              // pussywizard: handle expired auctions, auctions expired when realm was offline are also handled here (not during loading when many required things aren't loaded yet)
--- 
-2.17.0
-
