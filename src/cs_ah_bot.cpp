@@ -476,7 +476,7 @@ public:
     }
 };
 
-void AddSC_ah_bot_commandscript()
+void AddAHBotCommandScripts()
 {
     new ah_bot_commandscript();
 }

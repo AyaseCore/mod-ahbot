@@ -91,10 +91,6 @@ AuctionHouseBot.ItemsPerCycle = 200
 #            Bind_Quest_Item
 #             Default 0 (False)
 #
-#    AuctionHouseBot.DisableBeta_PTR_Unused
-#        Disable certain items that are usually unavailable to Players
-#    Default 0 (False)
-#
 #    AuctionHouseBot.DisablePermEnchant
 #        Disable Items with a Permanent Enchantment
 #    Default 0 (False)
@@ -147,7 +143,6 @@ AuctionHouseBot.Bind_When_Picked_Up = 0
 AuctionHouseBot.Bind_When_Equipped = 1
 AuctionHouseBot.Bind_When_Use = 1
 AuctionHouseBot.Bind_Quest_Item = 0
-AuctionHouseBot.DisableBeta_PTR_Unused = 0
 AuctionHouseBot.DisablePermEnchant = 0
 AuctionHouseBot.DisableConjured = 0
 AuctionHouseBot.DisableGems = 0
