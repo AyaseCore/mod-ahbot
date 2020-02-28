@@ -747,13 +747,16 @@ void AuctionHouseBot::Update()
 
 void AuctionHouseBot::Initialize()
 {
-    std::string disabledItems = sConfigMgr->GetStringDefault("AuctionHouseBot.DisabledItems", "");
     DisableItemStore.clear();
-    Tokenizer tokens(disabledItems, ' ');
-    for (Tokenizer::const_iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
+    QueryResult result = WorldDatabase.PQuery("SELECT item FROM mod_auctionhousebot_disabled_items");
+
+    if (result)
     {
-        uint32 id = uint32(atol(*iter));
-        DisableItemStore.insert(id);
+        do
+        {
+            Field* fields = result->Fetch();
+            DisableItemStore.insert(fields[0].GetUInt32());
+        } while (result->NextRow());
     }
 
     //End Filters
@@ -1296,6 +1299,7 @@ void AuctionHouseBot::Initialize()
         }
 
         sLog->outString("AuctionHouseBot:");
+        sLog->outString("%u disabled items", uint32(DisableItemStore.size()));
         sLog->outString("loaded %u grey trade goods", uint32(greyTradeGoodsBin.size()));
         sLog->outString("loaded %u white trade goods", uint32(whiteTradeGoodsBin.size()));
         sLog->outString("loaded %u green trade goods", uint32(greenTradeGoodsBin.size()));
@@ -1525,7 +1529,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 minItems = (uint32) strtoul(param1, NULL, 0);
-            WorldDatabase.PExecute("UPDATE auctionhousebot SET minitems = '%u' WHERE auctionhouse = '%u'", minItems, ahMapID);
+            WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET minitems = '%u' WHERE auctionhouse = '%u'", minItems, ahMapID);
             config->SetMinItems(minItems);
         }
         break;
@@ -1533,7 +1537,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 maxItems = (uint32) strtoul(param1, NULL, 0);
-			WorldDatabase.PExecute("UPDATE auctionhousebot SET maxitems = '%u' WHERE auctionhouse = '%u'", maxItems, ahMapID);
+			WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET maxitems = '%u' WHERE auctionhouse = '%u'", maxItems, ahMapID);
             config->SetMaxItems(maxItems);
             config->CalculatePercents();
         }
@@ -1574,20 +1578,20 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
             uint32 yellowi = (uint32) strtoul(param14, NULL, 0);
 
 			SQLTransaction trans = WorldDatabase.BeginTransaction();
-            trans->PAppend("UPDATE auctionhousebot SET percentgreytradegoods = '%u' WHERE auctionhouse = '%u'", greytg, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentwhitetradegoods = '%u' WHERE auctionhouse = '%u'", whitetg, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentgreentradegoods = '%u' WHERE auctionhouse = '%u'", greentg, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentbluetradegoods = '%u' WHERE auctionhouse = '%u'", bluetg, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentpurpletradegoods = '%u' WHERE auctionhouse = '%u'", purpletg, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentorangetradegoods = '%u' WHERE auctionhouse = '%u'", orangetg, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentyellowtradegoods = '%u' WHERE auctionhouse = '%u'", yellowtg, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentgreyitems = '%u' WHERE auctionhouse = '%u'", greyi, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentwhiteitems = '%u' WHERE auctionhouse = '%u'", whitei, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentgreenitems = '%u' WHERE auctionhouse = '%u'", greeni, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentblueitems = '%u' WHERE auctionhouse = '%u'", bluei, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentpurpleitems = '%u' WHERE auctionhouse = '%u'", purplei, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentorangeitems = '%u' WHERE auctionhouse = '%u'", orangei, ahMapID);
-            trans->PAppend("UPDATE auctionhousebot SET percentyellowitems = '%u' WHERE auctionhouse = '%u'", yellowi, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentgreytradegoods = '%u' WHERE auctionhouse = '%u'", greytg, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentwhitetradegoods = '%u' WHERE auctionhouse = '%u'", whitetg, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentgreentradegoods = '%u' WHERE auctionhouse = '%u'", greentg, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentbluetradegoods = '%u' WHERE auctionhouse = '%u'", bluetg, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentpurpletradegoods = '%u' WHERE auctionhouse = '%u'", purpletg, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentorangetradegoods = '%u' WHERE auctionhouse = '%u'", orangetg, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentyellowtradegoods = '%u' WHERE auctionhouse = '%u'", yellowtg, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentgreyitems = '%u' WHERE auctionhouse = '%u'", greyi, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentwhiteitems = '%u' WHERE auctionhouse = '%u'", whitei, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentgreenitems = '%u' WHERE auctionhouse = '%u'", greeni, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentblueitems = '%u' WHERE auctionhouse = '%u'", bluei, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentpurpleitems = '%u' WHERE auctionhouse = '%u'", purplei, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentorangeitems = '%u' WHERE auctionhouse = '%u'", orangei, ahMapID);
+            trans->PAppend("UPDATE mod_auctionhousebot SET percentyellowitems = '%u' WHERE auctionhouse = '%u'", yellowi, ahMapID);
 			WorldDatabase.CommitTransaction(trans);
             config->SetPercentages(greytg, whitetg, greentg, bluetg, purpletg, orangetg, yellowtg, greyi, whitei, greeni, bluei, purplei, orangei, yellowi);
         }
@@ -1596,7 +1600,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 minPrice = (uint32) strtoul(param1, NULL, 0);
-			WorldDatabase.PExecute("UPDATE auctionhousebot SET minprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), minPrice, ahMapID);
+			WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET minprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), minPrice, ahMapID);
             config->SetMinPrice(col, minPrice);
         }
         break;
@@ -1604,7 +1608,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 maxPrice = (uint32) strtoul(param1, NULL, 0);
-			WorldDatabase.PExecute("UPDATE auctionhousebot SET maxprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), maxPrice, ahMapID);
+			WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET maxprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), maxPrice, ahMapID);
             config->SetMaxPrice(col, maxPrice);
         }
         break;
@@ -1612,7 +1616,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 minBidPrice = (uint32) strtoul(param1, NULL, 0);
-			WorldDatabase.PExecute("UPDATE auctionhousebot SET minbidprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), minBidPrice, ahMapID);
+			WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET minbidprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), minBidPrice, ahMapID);
             config->SetMinBidPrice(col, minBidPrice);
         }
         break;
@@ -1620,7 +1624,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 maxBidPrice = (uint32) strtoul(param1, NULL, 0);
-			WorldDatabase.PExecute("UPDATE auctionhousebot SET maxbidprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), maxBidPrice, ahMapID);
+			WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET maxbidprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), maxBidPrice, ahMapID);
             config->SetMaxBidPrice(col, maxBidPrice);
         }
         break;
@@ -1628,7 +1632,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 maxStack = (uint32) strtoul(param1, NULL, 0);
-			WorldDatabase.PExecute("UPDATE auctionhousebot SET maxstack%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), maxStack, ahMapID);
+			WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET maxstack%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), maxStack, ahMapID);
             config->SetMaxStack(col, maxStack);
         }
         break;
@@ -1636,7 +1640,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 buyerPrice = (uint32) strtoul(param1, NULL, 0);
-			WorldDatabase.PExecute("UPDATE auctionhousebot SET buyerprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), buyerPrice, ahMapID);
+			WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET buyerprice%s = '%u' WHERE auctionhouse = '%u'", color.c_str(), buyerPrice, ahMapID);
             config->SetBuyerPrice(col, buyerPrice);
         }
         break;
@@ -1644,7 +1648,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 bidInterval = (uint32) strtoul(param1, NULL, 0);
-			WorldDatabase.PExecute("UPDATE auctionhousebot SET buyerbiddinginterval = '%u' WHERE auctionhouse = '%u'", bidInterval, ahMapID);
+			WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET buyerbiddinginterval = '%u' WHERE auctionhouse = '%u'", bidInterval, ahMapID);
             config->SetBiddingInterval(bidInterval);
         }
         break;
@@ -1652,7 +1656,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
         {
             char * param1 = strtok(args, " ");
             uint32 bidsPerInterval = (uint32) strtoul(param1, NULL, 0);
-			WorldDatabase.PExecute("UPDATE auctionhousebot SET buyerbidsperinterval = '%u' WHERE auctionhouse = '%u'", bidsPerInterval, ahMapID);
+			WorldDatabase.PExecute("UPDATE mod_auctionhousebot SET buyerbidsperinterval = '%u' WHERE auctionhouse = '%u'", bidsPerInterval, ahMapID);
             config->SetBidsPerInterval(bidsPerInterval);
         }
         break;
@@ -1664,66 +1668,66 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
 void AuctionHouseBot::LoadValues(AHBConfig *config)
 {
     if (debug_Out)
-		sLog->outError( "Start Settings for %s Auctionhouses:", WorldDatabase.PQuery("SELECT name FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetCString());
+		sLog->outError( "Start Settings for %s Auctionhouses:", WorldDatabase.PQuery("SELECT name FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetCString());
     if (AHBSeller)
     {
         //load min and max items
-		config->SetMinItems(WorldDatabase.PQuery("SELECT minitems FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxItems(WorldDatabase.PQuery("SELECT maxitems FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinItems(WorldDatabase.PQuery("SELECT minitems FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxItems(WorldDatabase.PQuery("SELECT maxitems FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
         //load percentages
-		uint32 greytg = WorldDatabase.PQuery("SELECT percentgreytradegoods FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 whitetg = WorldDatabase.PQuery("SELECT percentwhitetradegoods FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 greentg = WorldDatabase.PQuery("SELECT percentgreentradegoods FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 bluetg = WorldDatabase.PQuery("SELECT percentbluetradegoods FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 purpletg = WorldDatabase.PQuery("SELECT percentpurpletradegoods FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 orangetg = WorldDatabase.PQuery("SELECT percentorangetradegoods FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 yellowtg = WorldDatabase.PQuery("SELECT percentyellowtradegoods FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 greyi = WorldDatabase.PQuery("SELECT percentgreyitems FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 whitei = WorldDatabase.PQuery("SELECT percentwhiteitems FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 greeni = WorldDatabase.PQuery("SELECT percentgreenitems FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 bluei = WorldDatabase.PQuery("SELECT percentblueitems FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 purplei = WorldDatabase.PQuery("SELECT percentpurpleitems FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 orangei = WorldDatabase.PQuery("SELECT percentorangeitems FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
-		uint32 yellowi = WorldDatabase.PQuery("SELECT percentyellowitems FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 greytg = WorldDatabase.PQuery("SELECT percentgreytradegoods FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 whitetg = WorldDatabase.PQuery("SELECT percentwhitetradegoods FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 greentg = WorldDatabase.PQuery("SELECT percentgreentradegoods FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 bluetg = WorldDatabase.PQuery("SELECT percentbluetradegoods FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 purpletg = WorldDatabase.PQuery("SELECT percentpurpletradegoods FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 orangetg = WorldDatabase.PQuery("SELECT percentorangetradegoods FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 yellowtg = WorldDatabase.PQuery("SELECT percentyellowtradegoods FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 greyi = WorldDatabase.PQuery("SELECT percentgreyitems FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 whitei = WorldDatabase.PQuery("SELECT percentwhiteitems FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 greeni = WorldDatabase.PQuery("SELECT percentgreenitems FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 bluei = WorldDatabase.PQuery("SELECT percentblueitems FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 purplei = WorldDatabase.PQuery("SELECT percentpurpleitems FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 orangei = WorldDatabase.PQuery("SELECT percentorangeitems FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
+		uint32 yellowi = WorldDatabase.PQuery("SELECT percentyellowitems FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32();
         config->SetPercentages(greytg, whitetg, greentg, bluetg, purpletg, orangetg, yellowtg, greyi, whitei, greeni, bluei, purplei, orangei, yellowi);
         //load min and max prices
-		config->SetMinPrice(AHB_GREY, WorldDatabase.PQuery("SELECT minpricegrey FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxPrice(AHB_GREY, WorldDatabase.PQuery("SELECT maxpricegrey FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT minpricewhite FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT maxpricewhite FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT minpricegreen FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT maxpricegreen FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT minpriceblue FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT maxpriceblue FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT minpricepurple FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT maxpricepurple FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT minpriceorange FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT maxpriceorange FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT minpriceyellow FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT maxpriceyellow FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinPrice(AHB_GREY, WorldDatabase.PQuery("SELECT minpricegrey FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxPrice(AHB_GREY, WorldDatabase.PQuery("SELECT maxpricegrey FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT minpricewhite FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT maxpricewhite FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT minpricegreen FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT maxpricegreen FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT minpriceblue FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT maxpriceblue FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT minpricepurple FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT maxpricepurple FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT minpriceorange FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT maxpriceorange FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT minpriceyellow FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT maxpriceyellow FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
         //load min and max bid prices
-		config->SetMinBidPrice(AHB_GREY, WorldDatabase.PQuery("SELECT minbidpricegrey FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxBidPrice(AHB_GREY, WorldDatabase.PQuery("SELECT maxbidpricegrey FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinBidPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT minbidpricewhite FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxBidPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT maxbidpricewhite FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinBidPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT minbidpricegreen FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxBidPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT maxbidpricegreen FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinBidPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT minbidpriceblue FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxBidPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT maxbidpriceblue FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinBidPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT minbidpricepurple FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxBidPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT maxbidpricepurple FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinBidPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT minbidpriceorange FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxBidPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT maxbidpriceorange FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMinBidPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT minbidpriceyellow FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxBidPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT maxbidpriceyellow FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinBidPrice(AHB_GREY, WorldDatabase.PQuery("SELECT minbidpricegrey FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxBidPrice(AHB_GREY, WorldDatabase.PQuery("SELECT maxbidpricegrey FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinBidPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT minbidpricewhite FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxBidPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT maxbidpricewhite FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinBidPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT minbidpricegreen FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxBidPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT maxbidpricegreen FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinBidPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT minbidpriceblue FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxBidPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT maxbidpriceblue FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinBidPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT minbidpricepurple FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxBidPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT maxbidpricepurple FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinBidPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT minbidpriceorange FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxBidPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT maxbidpriceorange FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMinBidPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT minbidpriceyellow FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxBidPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT maxbidpriceyellow FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
         //load max stacks
-		config->SetMaxStack(AHB_GREY, WorldDatabase.PQuery("SELECT maxstackgrey FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxStack(AHB_WHITE, WorldDatabase.PQuery("SELECT maxstackwhite FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxStack(AHB_GREEN, WorldDatabase.PQuery("SELECT maxstackgreen FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxStack(AHB_BLUE, WorldDatabase.PQuery("SELECT maxstackblue FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxStack(AHB_PURPLE, WorldDatabase.PQuery("SELECT maxstackpurple FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxStack(AHB_ORANGE, WorldDatabase.PQuery("SELECT maxstackorange FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetMaxStack(AHB_YELLOW, WorldDatabase.PQuery("SELECT maxstackyellow FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxStack(AHB_GREY, WorldDatabase.PQuery("SELECT maxstackgrey FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxStack(AHB_WHITE, WorldDatabase.PQuery("SELECT maxstackwhite FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxStack(AHB_GREEN, WorldDatabase.PQuery("SELECT maxstackgreen FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxStack(AHB_BLUE, WorldDatabase.PQuery("SELECT maxstackblue FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxStack(AHB_PURPLE, WorldDatabase.PQuery("SELECT maxstackpurple FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxStack(AHB_ORANGE, WorldDatabase.PQuery("SELECT maxstackorange FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetMaxStack(AHB_YELLOW, WorldDatabase.PQuery("SELECT maxstackyellow FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
         if (debug_Out)
         {
             sLog->outError( "minItems                = %u", config->GetMinItems());
@@ -1846,7 +1850,7 @@ void AuctionHouseBot::LoadValues(AHBConfig *config)
         }
         if (debug_Out)
         {
-			sLog->outError( "Current Settings for %s Auctionhouses:", WorldDatabase.PQuery("SELECT name FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetCString());
+			sLog->outError( "Current Settings for %s Auctionhouses:", WorldDatabase.PQuery("SELECT name FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetCString());
             sLog->outError( "Grey Trade Goods\t%u\tGrey Items\t%u", config->GetItemCounts(AHB_GREY_TG), config->GetItemCounts(AHB_GREY_I));
             sLog->outError( "White Trade Goods\t%u\tWhite Items\t%u", config->GetItemCounts(AHB_WHITE_TG), config->GetItemCounts(AHB_WHITE_I));
             sLog->outError( "Green Trade Goods\t%u\tGreen Items\t%u", config->GetItemCounts(AHB_GREEN_TG), config->GetItemCounts(AHB_GREEN_I));
@@ -1859,17 +1863,17 @@ void AuctionHouseBot::LoadValues(AHBConfig *config)
     if (AHBBuyer)
     {
         //load buyer bid prices
-		config->SetBuyerPrice(AHB_GREY, WorldDatabase.PQuery("SELECT buyerpricegrey FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetBuyerPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT buyerpricewhite FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetBuyerPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT buyerpricegreen FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetBuyerPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT buyerpriceblue FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetBuyerPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT buyerpricepurple FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetBuyerPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT buyerpriceorange FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
-		config->SetBuyerPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT buyerpriceyellow FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetBuyerPrice(AHB_GREY, WorldDatabase.PQuery("SELECT buyerpricegrey FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetBuyerPrice(AHB_WHITE, WorldDatabase.PQuery("SELECT buyerpricewhite FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetBuyerPrice(AHB_GREEN, WorldDatabase.PQuery("SELECT buyerpricegreen FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetBuyerPrice(AHB_BLUE, WorldDatabase.PQuery("SELECT buyerpriceblue FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetBuyerPrice(AHB_PURPLE, WorldDatabase.PQuery("SELECT buyerpricepurple FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetBuyerPrice(AHB_ORANGE, WorldDatabase.PQuery("SELECT buyerpriceorange FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetBuyerPrice(AHB_YELLOW, WorldDatabase.PQuery("SELECT buyerpriceyellow FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
         //load bidding interval
-		config->SetBiddingInterval(WorldDatabase.PQuery("SELECT buyerbiddinginterval FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetBiddingInterval(WorldDatabase.PQuery("SELECT buyerbiddinginterval FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
         //load bids per interval
-		config->SetBidsPerInterval(WorldDatabase.PQuery("SELECT buyerbidsperinterval FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
+		config->SetBidsPerInterval(WorldDatabase.PQuery("SELECT buyerbidsperinterval FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetUInt32());
         if (debug_Out)
         {
             sLog->outError( "buyerPriceGrey          = %u", config->GetBuyerPrice(AHB_GREY));
@@ -1883,5 +1887,5 @@ void AuctionHouseBot::LoadValues(AHBConfig *config)
             sLog->outError( "buyerBidsPerInterval    = %u", config->GetBidsPerInterval());
         }
     }
-	if (debug_Out) sLog->outError( "End Settings for %s Auctionhouses:", WorldDatabase.PQuery("SELECT name FROM auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetCString());
+	if (debug_Out) sLog->outError( "End Settings for %s Auctionhouses:", WorldDatabase.PQuery("SELECT name FROM mod_auctionhousebot WHERE auctionhouse = %u", config->GetAHID())->Fetch()->GetCString());
 }
