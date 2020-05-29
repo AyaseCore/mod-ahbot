@@ -182,7 +182,7 @@ public:
             uint32 greytg = uint32(strtoul(param1, NULL, 0));
             uint32 whitetg = uint32(strtoul(param2, NULL, 0));
             uint32 greentg = uint32(strtoul(param3, NULL, 0));
-            uint32 bluetg = uint32(strtoul(param3, NULL, 0));
+            uint32 bluetg = uint32(strtoul(param4, NULL, 0));
             uint32 purpletg = uint32(strtoul(param5, NULL, 0));
             uint32 orangetg = uint32(strtoul(param6, NULL, 0));
             uint32 yellowtg = uint32(strtoul(param7, NULL, 0));
