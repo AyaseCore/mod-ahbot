@@ -1,6 +1,7 @@
 # ![logo](https://raw.githubusercontent.com/azerothcore/azerothcore.github.io/master/images/logo-github.png) AzerothCore
-- Latest build status with azerothcore: [![Build Status](https://travis-ci.org/azerothcore/mod-ah-bot.svg?branch=master)](https://travis-ci.org/azerothcore/mod-ah-bot)
-# Mod-AHBOT
+## Mod-AHBOT
+- Latest build status with azerothcore: [![Build Status](https://github.com/azerothcore/mod-ah-bot/workflows/core-build/badge.svg?branch=master&event=push)](https://github.com/azerothcore/mod-ah-bot)
+
 
 ## Important notes
 
