@@ -153,13 +153,13 @@ void AuctionHouseBot::addNewAuctions(Player *AHBplayer, AHBConfig *config)
 
     if (auctions >= minItems)
     {
-        //if (debug_Out) sLog->outError( "AHSeller: Auctions above minimum");
+        if (debug_Out) sLog->outError( "AHSeller: Auctions above minimum");
         return;
     }
 
     if (auctions >= maxItems)
     {
-        //if (debug_Out) sLog->outError( "AHSeller: Auctions at or above maximum");
+        if (debug_Out) sLog->outError( "AHSeller: Auctions at or above maximum");
         return;
     }
 
