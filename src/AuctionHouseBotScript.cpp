@@ -30,7 +30,7 @@ public:
 
     void OnBeforeAuctionHouseMgrSendAuctionSuccessfulMail(AuctionHouseMgr* /*auctionHouseMgr*/, AuctionEntry* /*auction*/, Player* owner, uint32& /*owner_accId*/, uint32& /*profit*/, bool& sendNotification, bool& updateAchievementCriteria, bool& /*sendMail*/) override
     {
-        if (owner && owner->GetGUIDLow() == auctionbot->GetAHBplayerGUID())
+        if (owner && owner->GetGUID().GetCounter() == auctionbot->GetAHBplayerGUID())
         {
             sendNotification = false;
             updateAchievementCriteria = false;
@@ -39,14 +39,14 @@ public:
 
     void OnBeforeAuctionHouseMgrSendAuctionExpiredMail(AuctionHouseMgr* /*auctionHouseMgr*/, AuctionEntry* /*auction*/, Player* owner, uint32& /*owner_accId*/, bool& sendNotification, bool& /*sendMail*/) override
     {
-        if (owner && owner->GetGUIDLow() == auctionbot->GetAHBplayerGUID())
+        if (owner && owner->GetGUID().GetCounter() == auctionbot->GetAHBplayerGUID())
             sendNotification = false;
     }
 
     void OnBeforeAuctionHouseMgrSendAuctionOutbiddedMail(AuctionHouseMgr* /*auctionHouseMgr*/, AuctionEntry* auction, Player* oldBidder, uint32& /*oldBidder_accId*/, Player* newBidder, uint32& newPrice, bool& /*sendNotification*/, bool& /*sendMail*/) override
     {
         if (oldBidder && !newBidder)
-            oldBidder->GetSession()->SendAuctionBidderNotification(auction->GetHouseId(), auction->Id, auctionbot->GetAHBplayerGUID(), newPrice, auction->GetAuctionOutBid(), auction->item_template);
+            oldBidder->GetSession()->SendAuctionBidderNotification(auction->GetHouseId(), auction->Id, ObjectGuid::Create<HighGuid::Player>(auctionbot->GetAHBplayerGUID()), newPrice, auction->GetAuctionOutBid(), auction->item_template);
     }
 
     void OnAuctionAdd(AuctionHouseObject* /*ah*/, AuctionEntry* auction) override
