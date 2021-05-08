@@ -402,7 +402,7 @@ void AuctionHouseBot::addNewAuctions(Player *AHBplayer, AHBConfig *config)
 
             uint32 dep =  sAuctionMgr->GetAuctionDeposit(ahEntry, etime, item, stackCount);
 
-            SQLTransaction trans = CharacterDatabase.BeginTransaction();
+            auto trans = CharacterDatabase.BeginTransaction();
             AuctionEntry* auctionEntry = new AuctionEntry();
             auctionEntry->Id = sObjectMgr->GenerateAuctionID();
             auctionEntry->houseId = config->GetAHID();
@@ -642,8 +642,8 @@ void AuctionHouseBot::addNewAuctionBuyerBotBid(Player *AHBplayer, AHBConfig *con
                 else
                 {
                     // mail to last bidder and return money
-                    SQLTransaction trans = CharacterDatabase.BeginTransaction();
-                    sAuctionMgr->SendAuctionOutbiddedMail(auction , bidprice, session->GetPlayer(), trans);
+                    auto trans = CharacterDatabase.BeginTransaction();
+                    sAuctionMgr->SendAuctionOutbiddedMail(auction, bidprice, session->GetPlayer(), trans);
                     CharacterDatabase.CommitTransaction(trans);
                     //pl->ModifyMoney(-int32(price));
                 }
@@ -657,7 +657,7 @@ void AuctionHouseBot::addNewAuctionBuyerBotBid(Player *AHBplayer, AHBConfig *con
         }
         else
         {
-            SQLTransaction trans = CharacterDatabase.BeginTransaction();
+            auto trans = CharacterDatabase.BeginTransaction();
             //buyout
             if ((auction->bidder) && (AHBplayer->GetGUID() != auction->bidder))
             {
@@ -670,7 +670,7 @@ void AuctionHouseBot::addNewAuctionBuyerBotBid(Player *AHBplayer, AHBConfig *con
             //sAuctionMgr->SendAuctionSalePendingMail(auction, trans);
             sAuctionMgr->SendAuctionSuccessfulMail(auction, trans);
             sAuctionMgr->SendAuctionWonMail(auction, trans);
-            auction->DeleteFromDB( trans);
+            auction->DeleteFromDB(trans);
 
 			sAuctionMgr->RemoveAItem(auction->item_guid);
             auctionHouse->RemoveAuction(auction);
@@ -1555,7 +1555,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
             uint32 orangei = (uint32) strtoul(param13, NULL, 0);
             uint32 yellowi = (uint32) strtoul(param14, NULL, 0);
 
-			SQLTransaction trans = WorldDatabase.BeginTransaction();
+			auto trans = WorldDatabase.BeginTransaction();
             trans->PAppend("UPDATE mod_auctionhousebot SET percentgreytradegoods = '%u' WHERE auctionhouse = '%u'", greytg, ahMapID);
             trans->PAppend("UPDATE mod_auctionhousebot SET percentwhitetradegoods = '%u' WHERE auctionhouse = '%u'", whitetg, ahMapID);
             trans->PAppend("UPDATE mod_auctionhousebot SET percentgreentradegoods = '%u' WHERE auctionhouse = '%u'", greentg, ahMapID);
