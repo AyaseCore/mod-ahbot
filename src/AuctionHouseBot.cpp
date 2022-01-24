@@ -23,6 +23,7 @@
 #include "Config.h"
 #include "Player.h"
 #include "WorldSession.h"
+#include "GameTime.h"
 #include <vector>
 
 using namespace std;
@@ -1496,7 +1497,7 @@ void AuctionHouseBot::Commands(uint32 command, uint32 ahMapID, uint32 col, char*
             {
                 if (itr->second->owner.GetCounter() == AHBplayerGUID)
                 {
-                    itr->second->expire_time = sWorld->GetGameTime();
+                    itr->second->expire_time = GameTime::GetGameTime().count();
                     uint32 id = itr->second->Id;
                     uint32 expire_time = itr->second->expire_time;
                     CharacterDatabase.PExecute("UPDATE auctionhouse SET time = '%u' WHERE id = '%u'", expire_time, id);
