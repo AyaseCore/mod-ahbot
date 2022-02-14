@@ -791,7 +791,7 @@ void AuctionHouseBot::Initialize()
             do
             {
                 Field* fields = results->Fetch();
-                npcItems.push_back(fields[0].Get<uint32>());
+                npcItems.push_back(fields[0].Get<int32>());
 
             } while (results->NextRow());
         }
