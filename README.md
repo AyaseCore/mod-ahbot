@@ -43,4 +43,3 @@ Notes:
 
 - Ayase: ported the bot to AzerothCore
 - Other contributors (check the contributors list)
-
