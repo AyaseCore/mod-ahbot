@@ -24,6 +24,7 @@
 #include "Player.h"
 #include "WorldSession.h"
 #include "GameTime.h"
+#include "DatabaseEnv.h"
 #include <vector>
 
 using namespace std;
@@ -592,7 +593,7 @@ void AuctionHouseBot::addNewAuctionBuyerBotBid(Player *AHBplayer, AHBConfig *con
                     LOG_ERROR("module", "AHBuyer: Quality {} not Supported", prototype->Quality);
                     continue;
             }
-        }        
+        }
 
         // check some special items, and do recalculating to their prices
         switch (prototype->Class)
