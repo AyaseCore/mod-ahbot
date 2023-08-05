@@ -27,6 +27,12 @@ EndScriptData */
 #include "AuctionHouseBot.h"
 #include "Config.h"
 
+#if AC_COMPILER == AC_COMPILER_GNU
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+using namespace Acore::ChatCommands;
+
 class ah_bot_commandscript : public CommandScript
 {
 public:
@@ -98,7 +104,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(0, ahMapID, NULL, NULL);
+            auctionbot->Commands(0, ahMapID, 0, NULL);
         }
         else if (strncmp(opt, "minitems", l) == 0)
         {
@@ -109,7 +115,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(1, ahMapID, NULL, param1);
+            auctionbot->Commands(1, ahMapID, 0, param1);
         }
         else if (strncmp(opt, "maxitems", l) == 0)
         {
@@ -120,7 +126,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(2, ahMapID, NULL, param1);
+            auctionbot->Commands(2, ahMapID, 0, param1);
         }
         else if (strncmp(opt, "mintime", l) == 0)
         {
@@ -134,7 +140,7 @@ public:
                 return false;
             }
 
-            auctionbot.Commands(3, ahMapID, NULL, param1);
+            auctionbot.Commands(3, ahMapID, 0, param1);
             */
         }
         else if (strncmp(opt, "maxtime", l) == 0)
@@ -149,7 +155,7 @@ public:
                 return false;
             }
 
-            auctionbot.Commands(4, ahMapID, NULL, param1);
+            auctionbot.Commands(4, ahMapID, 0, param1);
             */
         }
         else if (strncmp(opt, "percentages", l) == 0)
@@ -182,7 +188,7 @@ public:
             uint32 greytg = uint32(strtoul(param1, NULL, 0));
             uint32 whitetg = uint32(strtoul(param2, NULL, 0));
             uint32 greentg = uint32(strtoul(param3, NULL, 0));
-            uint32 bluetg = uint32(strtoul(param3, NULL, 0));
+            uint32 bluetg = uint32(strtoul(param4, NULL, 0));
             uint32 purpletg = uint32(strtoul(param5, NULL, 0));
             uint32 orangetg = uint32(strtoul(param6, NULL, 0));
             uint32 yellowtg = uint32(strtoul(param7, NULL, 0));
@@ -234,7 +240,7 @@ public:
             strcat(param, param13);
             strcat(param, " ");
             strcat(param, param14);
-            auctionbot->Commands(5, ahMapID, NULL, param);
+            auctionbot->Commands(5, ahMapID, 0, param);
         }
         else if (strncmp(opt, "minprice", l) == 0)
         {
@@ -451,7 +457,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(12, ahMapID, NULL, param1);
+            auctionbot->Commands(12, ahMapID, 0, param1);
         }
         else if (strncmp(opt, "bidsperinterval", l) == 0)
         {
@@ -463,7 +469,7 @@ public:
                 return false;
             }
 
-            auctionbot->Commands(13, ahMapID, NULL, param1);
+            auctionbot->Commands(13, ahMapID, 0, param1);
         }
         else
         {
@@ -476,7 +482,7 @@ public:
     }
 };
 
-void AddSC_ah_bot_commandscript()
+void AddAHBotCommandScripts()
 {
     new ah_bot_commandscript();
 }

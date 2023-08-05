@@ -1,1 +1,0 @@
-add_definitions(-DMOD_AH_BOT)
